@@ -10,13 +10,46 @@ s64 fib(s64 n)
 	}
 }
 
+s64 fib2(void)
+{
+	return fib(40);
+}
+
+s64 fib3(s64 n, s64 memory[])
+{
+	if (n < 2)
+	{
+		return n;
+	} else if (memory[n] != 0) {
+		return memory[n];
+	} else {
+		s64 x;
+		x = 2;
+		while (x <= n)
+		{
+			memory[x] = memory[x - 1] + memory[x - 2];
+			x = x + 1;
+		}
+		// memory[n] = fib(n - 1) + fib(n - 2);
+		return memory[n];
+	}
+}
+
 s64 main(void)
 {
 	s64 x;
+	s64 fibArray[64];
+	
 	x = 0;
-	while (x++ < 5)
+	while (x++ < 64)
 	{
-		print(fib(28));
+		fibArray[x] = 0;
+	}
+	fibArray[1] = 1;
+	x = 0;
+	while (x++ < 1)
+	{
+		print(fib3(40, fibArray));
 	}
 	return 0;
 }

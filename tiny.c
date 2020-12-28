@@ -464,15 +464,15 @@ localVarsScoped(Context *c, AST *node)
 		case FUNC_CALL:
 		{
 			node->attribute.s[node->identLen] = 0;
-			if (strcmp(
-				(const char *)node->attribute.s,
-				"print") == 0)
-			{
-				node->exprType = VOID_TYPE;
-				node->identLen = 1;
-				node->nodeKind = PRINT_INTEGER;
-				break;
-			}
+			//~ if (strcmp(
+				//~ (const char *)node->attribute.s,
+				//~ "print") == 0)
+			//~ {
+				//~ node->exprType = VOID_TYPE;
+				//~ node->identLen = 1;
+				//~ node->nodeKind = PRINT_INTEGER;
+				//~ break;
+			//~ }
 			hashTableNode *result=
 			hashTable_find_internal(
 				c->hashTable,
@@ -759,11 +759,11 @@ typeCheckNode(Context *c, AST *node)
 			if ((node->children == 0) && (funcDecl->children->exprType == VOID_TYPE))
 			{
 				//printf("** GOOD EXIT 1 **\n");
-				break;
+				//~ break;
 			} else if  (node->children == 0) {
 				printf("error FUNC_CALL: wrong parameters line %d.\n", node->lineNumber);
 				break;
-			}
+			} else 
 			if(node->children->exprType != funcDecl->children->exprType)
 			{
 				printf("errorA FUNC_CALL: wrong parameters line %d.\n", node->lineNumber);
@@ -771,7 +771,7 @@ typeCheckNode(Context *c, AST *node)
 			} else if((node->children->siblings == 0) && (funcDecl->children->siblings== 0))
 			{
 				//printf("** GOOD EXIT 2 **\n");
-				break;
+				//~ break;
 			} else {
 				AST *walkNode = node->children->siblings;
 				AST *walkDecl = funcDecl->children->siblings;
@@ -798,27 +798,14 @@ typeCheckNode(Context *c, AST *node)
 			}
 			//printf("** GOOD EXIT 3 **\n");
 			// code gen
-			// arguments are pushed
-			//~ *c->programStart = 0;
-			//~ c->programStart++;
-			//~ s64 offset = (funcDecl->attribute.s - (c->programStart+4));
-			//~ *c->programStart = VM_OP_CALL;
-			//~ c->programStart++;
-			//~ *c->programStart = (offset >> 8) & 0xFF;
-			//~ c->programStart++;
-			//~ *c->programStart = offset & 0xFF;
-			//~ c->programStart++;
-			//~ *c->programStart = node->identLen;
-			//~ if (node->identLen > 0)
-			//~ {
-				//~ *c->programStart = node->identLen-1;
-			//~ } else {
-				//~ *c->programStart = node->identLen;
-			//~ }
-			//~ c->programStart++;
 			s64 offset = (funcDecl->attribute.s - (c->programStart+3));
-			*c->programStart = VM_OP_CALL0+node->identLen;
-			c->programStart++;
+			if (node->identLen != 0) {
+				*c->programStart = VM_OP_CALL0+node->identLen;
+				c->programStart++;
+			} else {
+				*c->programStart = VM_OP_CALL8;
+				c->programStart++;
+			}
 			*c->programStart = (offset >> 8) & 0xFF;
 			c->programStart++;
 			*c->programStart = offset & 0xFF;
@@ -833,11 +820,11 @@ typeCheckNode(Context *c, AST *node)
 			if ((node->children == 0) && (funcDecl->children->exprType == VOID_TYPE))
 			{
 				//printf("** GOOD EXIT 1 **\n");
-				break;
+				//~ break;
 			} else if  (node->children == 0) {
 				printf("error FUNC_CALL: wrong parameters line %d.\n", node->lineNumber);
 				break;
-			}
+			} else 
 			if(node->children->exprType != funcDecl->children->exprType)
 			{
 				printf("errorA FUNC_CALL: wrong parameters line %d.\n", node->lineNumber);
@@ -845,7 +832,7 @@ typeCheckNode(Context *c, AST *node)
 			} else if((node->children->siblings == 0) && (funcDecl->children->siblings== 0))
 			{
 				//printf("** GOOD EXIT 2 **\n");
-				break;
+				//~ break;
 			} else {
 				AST *walkNode = node->children->siblings;
 				AST *walkDecl = funcDecl->children->siblings;
@@ -877,13 +864,16 @@ typeCheckNode(Context *c, AST *node)
 			//~ c->programStart++;
 			s64 offset = (funcDecl->attribute.s - (c->programStart+3));
 			*c->programStart = VM_OP_CALL0+node->identLen;
-			c->programStart++;
+				c->programStart++;
 			*c->programStart = (offset >> 8) & 0xFF;
 			c->programStart++;
 			*c->programStart = offset & 0xFF;
 			c->programStart++;
-			//~ *c->programStart = node->identLen;
-			//~ c->programStart++;
+			// drop result from stack if arguments are used
+			if (node->identLen != 0) {
+				*c->programStart = VM_OP_ADD;
+				c->programStart++;
+			}
 		}
 		break;
 		

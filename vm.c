@@ -91,6 +91,7 @@ enum{ VM_OP_INT0=0, VM_OP_INT1, VM_OP_INT2,
 	VM_OP_CALL5,
 	VM_OP_CALL6,
 	VM_OP_CALL7,
+	VM_OP_CALL8,
 	VM_OP_PUSH_GLOBAL,
 	VM_OP_STORE_GLOBAL,
 	VM_OP_LOAD_INDEX_GLOBAL,
@@ -257,7 +258,7 @@ switch(*ip)
 		goto loop;
 	}
 	
-	case VM_OP_CALL0 ... VM_OP_CALL7:
+	case VM_OP_CALL0 ... VM_OP_CALL8:
 	{
 		Data * restrict tmpSp;
 		Data * restrict tmpFp;
@@ -270,7 +271,7 @@ switch(*ip)
 		tmpSp = sp;
 		// reset stack pointer to where it was for current function
 		// [*spTmpExpr1]  [Blank]  TOS = arg1
-		sp-=numOfParams;
+		sp-=numOfParams&0x07;
 		// set new frame pointer to one above this
 		//~ tmpFp = sp+1;
 		tmpFp = sp;
@@ -552,6 +553,7 @@ switch(*ip)
 	{
 		sp--;
 		printf("%ld\n", tos.i);
+		printf("%ld\n", (u64)sp);
 		tos = *sp;
 		ip++;
 		goto loop;
